@@ -44,9 +44,7 @@ var EventUtil = {
 function Calendar(){
 	this.now = new Date();
 	this.year = this.now.getFullYear();
-	this.month = this.now.getMonth() + 1;//切记，月份从0开始计数
-	this.date = this.now.getDate();
-	this.day = this.now.getDay();
+	this.month = this.now.getMonth()+1;//切记，月份从0开始计数
 	this.createFrame();
 	this.getTimeDetail();
 	this.render();
@@ -71,8 +69,12 @@ Calendar.prototype = {
 		const dateWrap = document.createElement("div");
 		const pre = document.createElement("a");
 		const next = document.createElement("a");
-		const titleYear = document.createElement("span");
-		const titleMonth = document.createElement("span");
+		const titleYear = document.createElement("ul");
+		const titleMonth = document.createElement("ul");
+		const yearTxt = document.createTextNode("");
+		const monthTxt = document.createTextNode("");
+		const yearSign = document.createElement("span");
+		const monthSign = document.createElement("span");
 		const table = document.createElement("table");
 		const tbody = document.createElement("tbody");
 
@@ -103,56 +105,21 @@ Calendar.prototype = {
 
 		pre.innerHTML = "<";
 		next.innerHTML = ">";
-		titleYear.innerHTML = this.year + "年";
-		titleMonth.innerHTML = this.month + "月";
+		yearSign.innerHTML = "年";
+		monthSign.innerHTML = "月";
+		titleYear.appendChild(yearTxt);
+		titleMonth.appendChild(monthTxt);
 		title.appendChild(pre);
 		title.appendChild(dateWrap);
 		dateWrap.appendChild(titleYear);
+		dateWrap.appendChild(yearSign);
 		dateWrap.appendChild(titleMonth);
+		dateWrap.appendChild(monthSign);
 		title.appendChild(next);
 		table.appendChild(tbody);
 		calendar.appendChild(title);
 		calendar.appendChild(table);
 		document.body.appendChild(calendar);
-	},
-
-	render:function(){
-		this.init();
-		var index = 1;
-		var temp = NaN;
-		var day = this.tempDay || this.day;
-		const tbody = document.getElementById("calendarBody");
-		for (let i = day - 1; i < 7; i++) {
-			tbody.rows[1].cells[i].innerHTML = index++;
-		}
-		for (let j = 2; j < 7; j++) {
-			for (let z = 0; z < 7; z++) {
-				if (index <= this.allDays) {
-					tbody.rows[j].cells[z].innerHTML = index++;
-				}
-			}
-		}
-		//为当前日期和以前日期添加样式
-		// for(let i = 1; i < 6; i++){
-		// 	for(let j = 0; j < 7; j++){
-		// 		if(tbody.rows[i].cells[j].innerHTML == this.date){
-		// 			tbody.rows[i].cells[j].classList.add("today");
-		// 		}else if(tbody.rows[i].cells[j].innerHTML < this.date){
-		// 			tbody.rows[i].cells[j].classList.add("preDay");
-		// 		}
-		// 	}
-		// }
-	},
-
-	//初始化
-	init:function(){
-		const tbody = document.getElementById("calendarBody");
-		
-		for(let i = 1; i < 7; i++){
-			for(let j = 0; j < 7; j++){
-				tbody.rows[i].cells[j].innerHTML = "";
-			}
-		}
 	},
 
 	//获取时间细节
@@ -163,13 +130,10 @@ Calendar.prototype = {
 		this.tempDate = new Date(this.year, this.month-1);//当前年月所得到的时间
 		this.tempYear = this.tempDate.getFullYear();
 		this.tempMonth = this.tempDate.getMonth();
-		this.tempDay = this.tempDate.getDay();
+		this.tempDay = this.tempDate.getDay();//该月份的第一天是星期几
 		if(this.tempDay == 0){
 			this.tempDay = 7;
 		}
-		console.log(this.tempYear+"年");
-		console.log(this.tempMonth+1+"月");
-		console.log("该月第一天是周"+this.tempDay);
 		//判断是否为闰年
 		if(this.tempYear % 400 == 0 ||(this.tempYear % 4 == 0 && this.tempYear % 100 != 0)){
 			this.flag = true;
@@ -179,15 +143,39 @@ Calendar.prototype = {
 		}else{//闰年
 			this.allDays = leapYear[this.tempMonth];
 		}
-		// console.log("正常:"+this.now);
-		// console.log("更改后:"+this.tempDate);
-		// console.log(this.allDays);
-		
-		// this.date = this.tempDate.getDate();
-		// this.day = this.tempDate.getDay();
-		// console.log(this.date);
-		// console.log(this.day);
+	},
 
+	//渲染函数
+	render:function(){
+		//执行初始化函数
+		this.init();
+
+		var index = 1;
+		const tbody = document.getElementById("calendarBody");
+		const titleYear = document.getElementById("titleYear");
+		const titleMonth = document.getElementById("titleMonth");
+		for (let i = this.tempDay-1; i < 7; i++) {
+			tbody.rows[1].cells[i].innerHTML = index++;
+		}
+		for (let j = 2; j < 7; j++) {
+			for (let z = 0; z < 7; z++) {
+				if (index <= this.allDays) {
+					tbody.rows[j].cells[z].innerHTML = index++;
+				}
+			}
+		}
+		titleYear.firstChild.nodeValue = this.tempYear;
+		titleMonth.firstChild.nodeValue = (this.tempMonth+1);
+	},
+
+	//初始化函数，主要是清空表格中的日期显示
+	init:function(){
+		const tbody = document.getElementById("calendarBody");
+		for(let i = 1; i < 7; i++){
+			for(let j = 0; j < 7; j++){
+				tbody.rows[i].cells[j].innerHTML = "";
+			}
+		}
 	},
 
 	//改变日期函数,利用事件委托来减少内存分配
@@ -214,11 +202,49 @@ Calendar.prototype = {
 				default:
 					this.month = ++this.month;
 			}
+		}else if(target == titleMonth){
+			this.changeTitle(titleMonth);
+			for (let i = 1; i <= 12; i++) {
+				target.childNodes[i].classList.toggle("hide");
+			}
 		}
-		titleYear.innerHTML = this.year + "年";
-		titleMonth.innerHTML = this.month + "月";
+		titleYear.innerHTML = this.year;
+		titleMonth.firstChild.nodeValue = this.month;
 
 		this.getTimeDetail();
 		this.render();
-	}
+	},
+
+	changeTitle:function(argument){
+		const self = this;
+		if(argument == titleMonth){//目标节点为月份
+			let list = [];
+			for (let i = 1; i <= 12; i++) {
+				let li = document.createElement("li");
+				li.innerHTML = i;
+				li.value = i;
+				li.className = "hide";
+				list.push(li);
+			}
+			if(argument.childNodes.length <= 12){
+				for (let i = 0; i < 12; i++) {
+					argument.appendChild(list[i]);
+				}
+			}
+			EventUtil.addHandler(argument, "click",function(event){
+				event = EventUtil.getEvent(event);
+				var selectLi = EventUtil.getTarget(event);
+				console.log(selectLi);
+				self.month = selectLi.value;
+				const titleMonth = document.getElementById("titleMonth");
+				console.log("第一个节点的值:"+titleMonth.firstChild.nodeValue);
+				console.log("self.month:"+self.month);
+				for (let i = 1; i <= 12; i++) {
+					argument.childNodes[i].classList.toggle("hide");
+				}
+			});
+		}
+		console.log(this.month);
+	},
+
 }
