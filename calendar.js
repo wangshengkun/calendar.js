@@ -52,6 +52,8 @@ function Calendar(){
 
 	const title = document.getElementById("calendarTitle");
 	const self = this;
+
+	//为每个实例的标题添加一个点击事件
 	EventUtil.addHandler(title, "click", function(event){
 		event = EventUtil.getEvent(event);
 		var target = EventUtil.getTarget(event);
@@ -141,11 +143,18 @@ Calendar.prototype = {
 				yearTable.rows[i].insertCell(j);
 				if(i == 0 && j == 0){
 					yearTable.rows[i].cells[j].innerHTML = "<";
+					yearTable.rows[i].cells[j].id = "preYear";
 				}else if(i == 0 && j == 4){
 					yearTable.rows[i].cells[j].innerHTML = ">";
+					yearTable.rows[i].cells[j].id = "nextYear";
+				}else if(i == 0 && (j != 0 || j != 4)){
+					yearTable.rows[i].cells[j].classList.add("noSelect");
 				}
 			}
 		}
+		yearTable.rows[1].cells[0].id = "startYear";
+		yearTable.rows[2].cells[4].id = "endYear";
+
 		//月份表单
 		var index = 1;
 		for(let i = 0; i < 3; i++){
@@ -253,19 +262,30 @@ Calendar.prototype = {
 
 		titleYear.firstChild.nodeValue = this.year;
 		titleMonth.firstChild.nodeValue = this.month;
-
 		this.getTimeDetail();
 		this.render();
 	},
 
 	changeTitle:function(classify){
 		const self = this;
+		const preYear = document.getElementById("preYear");
+		const nextYear = document.getElementById("nextYear");
+		const startYear = document.getElementById("startYear");
+		const endYear = document.getElementById("endYear");
 		if(classify == yearTable){
-			EventUtil.addHandler(classify, "click", function(event) {
+			EventUtil.addHandler(classify, "click", function(event){
 				event = EventUtil.getEvent(event);
 				var target = EventUtil.getTarget(event);
-				self.year = target.value;
-				classify.classList.add("hide");
+				if(target == preYear){
+					let index = Number(startYear.value) - 10;
+					self.refreshYear(index);
+				}else if(target == nextYear){
+					let index = Number(endYear.value) + 1;
+					self.refreshYear(index);
+				}else if(target != preYear ||target != nextYear){
+					self.year = target.value;
+					classify.classList.add("hide");
+				}
 			});
 		}else{
 			EventUtil.addHandler(classify, "click", function(event){
@@ -281,6 +301,10 @@ Calendar.prototype = {
 	judgeYear:function(){
 		const yearTable = document.getElementById("yearTable");
 		var index;
+
+		// if(this.year >= 2000){
+		// 	var  = this.year % 2000;
+		// }
 
 		if(1980 <=this.year && this.year < 1990){
 			index = 1980;
@@ -304,6 +328,9 @@ Calendar.prototype = {
 	//刷新年份表单中的年份
 	refreshYear:function(index){
 		const yearTable = document.getElementById("yearTable");
+		yearTable.rows[0].cells[1].value = this.year;
+		yearTable.rows[0].cells[2].value = this.year;
+		yearTable.rows[0].cells[3].value = this.year;
 		for(let i = 1; i < 3; i++){
 			for(let j = 0; j < 5; j++){
 				yearTable.rows[i].cells[j].value = index;

@@ -127,3 +127,7 @@
 .hide{
 	display: none;
 }
+.noSelect{
+	cursor: default !important;
+	background-color: #ccc !important;
+}
