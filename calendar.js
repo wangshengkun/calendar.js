@@ -46,7 +46,7 @@ function Calendar(){
 	this.year = this.now.getFullYear();
 	this.month = this.now.getMonth()+1;//切记，月份从0开始计数
 	this.createFrame();
-	this.monthTable();
+	this.createTable();
 	this.getTimeDetail();
 	this.render();
 
@@ -123,12 +123,30 @@ Calendar.prototype = {
 		document.body.appendChild(calendar);
 	},
 
-	//月份表单
-	monthTable:function(){
+	//创建隐藏表单
+	createTable:function(){
 		const calendarTitle = document.getElementById("calendarTitle");
+		const yearTable = document.createElement("tbody");
 		const monthTable = document.createElement("tbody");
+
+		yearTable.id = "yearTable";
+		yearTable.classList.add("hide");
 		monthTable.id = "monthTable";
 		monthTable.classList.add("hide");
+
+		//年份表单
+		for (let i = 0; i < 3; i++) {
+			yearTable.insertRow(i);
+			for (let j = 0; j < 5; j++) {
+				yearTable.rows[i].insertCell(j);
+				if(i == 0 && j == 0){
+					yearTable.rows[i].cells[j].innerHTML = "<";
+				}else if(i == 0 && j == 4){
+					yearTable.rows[i].cells[j].innerHTML = ">";
+				}
+			}
+		}
+		//月份表单
 		var index = 1;
 		for(let i = 0; i < 3; i++){
 			monthTable.insertRow(i);
@@ -139,6 +157,7 @@ Calendar.prototype = {
 				index++;
 			}
 		}
+		calendarTitle.appendChild(yearTable);
 		calendarTitle.appendChild(monthTable);
 	},
 
@@ -204,6 +223,7 @@ Calendar.prototype = {
 		const next = document.getElementById("nextMonth");
 		const titileYear = document.getElementById("titleYear");
 		const titleMonth = document.getElementById("titleMonth");
+		const yearTable = document.getElementById("yearTable");
 		const monthTable = document.getElementById("monthTable");
 		if(target == pre){
 			switch(this.month){
@@ -223,10 +243,14 @@ Calendar.prototype = {
 				default:
 					this.month = ++this.month;
 			}
+		}else if(target == titleYear){
+			this.judgeYear();
+			this.changeTitle(yearTable);
 		}else if(target == titleMonth){
 			monthTable.classList.toggle("hide");
 			this.changeTitle(monthTable);
 		}
+
 		titleYear.firstChild.nodeValue = this.year;
 		titleMonth.firstChild.nodeValue = this.month;
 
@@ -236,8 +260,15 @@ Calendar.prototype = {
 
 	changeTitle:function(classify){
 		const self = this;
-		if(classify == monthTable){
+		if(classify == yearTable){
 			EventUtil.addHandler(classify, "click", function(event) {
+				event = EventUtil.getEvent(event);
+				var target = EventUtil.getTarget(event);
+				self.year = target.value;
+				classify.classList.add("hide");
+			});
+		}else{
+			EventUtil.addHandler(classify, "click", function(event){
 				event = EventUtil.getEvent(event);
 				var target = EventUtil.getTarget(event);
 				self.month = target.value;
@@ -246,4 +277,41 @@ Calendar.prototype = {
 		}
 	},
 
+	//判断当前年份
+	judgeYear:function(){
+		const yearTable = document.getElementById("yearTable");
+		var index;
+
+		if(1980 <=this.year && this.year < 1990){
+			index = 1980;
+		}else if(1990 <= this.year && this.year < 2000) {
+			index = 1990;
+		}else if(2000 <= this.year && this.year < 2010) {
+			index = 2000;
+		}else if(2010 <= this.year && this.year < 2020) {
+			index = 2010;	
+		}else if(2020 <= this.year && this.year < 2030) {
+			index = 2020;	
+		}else{
+			alert("当前年份超出限制,无法选择年份。");
+			//利用return语句停止执行剩余语句
+			return;
+		}
+			this.refreshYear(index);
+			yearTable.classList.toggle("hide");	
+	},
+
+	//刷新年份表单中的年份
+	refreshYear:function(index){
+		const yearTable = document.getElementById("yearTable");
+		for(let i = 1; i < 3; i++){
+			for(let j = 0; j < 5; j++){
+				yearTable.rows[i].cells[j].value = index;
+				yearTable.rows[i].cells[j].innerHTML = index;
+				index++;
+			}
+		}
+	}
+
 }
+var calendar = new Calendar();

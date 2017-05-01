@@ -16,12 +16,12 @@
 	color:#fff;
 }
 #preMonth{
-	left:0;
+	left:0px;
 	width:40px;
 	font-weight: bolder;
 }
 #nextMonth{
-	right:0;
+	right:0px;
 	width:40px;
 	font-weight: bolder;
 }
@@ -83,8 +83,26 @@
 #calendar .preDay{
 	color:#ddd;
 }
-.hide{
-	display: none;
+
+/*年份选择表格样式*/
+#yearTable{
+	z-index:1;
+	position: relative;
+	left:40px;
+	top:30px;
+}
+#yearTable tr:nth-child(1) td{
+	border:none;
+	height: 10px;
+}
+#yearTable td{
+	box-sizing:border-box;
+	font-size: 12px;
+	cursor: pointer;
+	width: 40px;
+	text-align: center;
+	border: 1px solid #000;
+	background-color: #ccc;
 }
 
 /*月份选择表格样式*/
@@ -103,6 +121,9 @@
 	border: 1px solid #000;
 	background-color: #ccc;
 }
-#monthTable td:hover{
+#yearTable td:hover, #monthTable td:hover{
 	background-color: #ff0;
+}
+.hide{
+	display: none;
 }
