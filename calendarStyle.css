@@ -59,7 +59,7 @@
 	background-color: #ddd !important;
 }
 #calendar table{
-	position: absolute;
+	position: relative;
 	cursor:pointer;
 	border-collapse:collapse;
 }
@@ -85,4 +85,24 @@
 }
 .hide{
 	display: none;
+}
+
+/*月份选择表格样式*/
+#monthTable{
+	z-index:1;
+	position: relative;
+	left:114px;
+	top:30px;
+}
+#monthTable td{
+	box-sizing:border-box;
+	font-size: 12px;
+	cursor: pointer;
+	width: 25px;
+	text-align: center;
+	border: 1px solid #000;
+	background-color: #ccc;
+}
+#monthTable td:hover{
+	background-color: #ff0;
 }

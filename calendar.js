@@ -46,6 +46,7 @@ function Calendar(){
 	this.year = this.now.getFullYear();
 	this.month = this.now.getMonth()+1;//切记，月份从0开始计数
 	this.createFrame();
+	this.monthTable();
 	this.getTimeDetail();
 	this.render();
 
@@ -122,6 +123,25 @@ Calendar.prototype = {
 		document.body.appendChild(calendar);
 	},
 
+	//月份表单
+	monthTable:function(){
+		const calendarTitle = document.getElementById("calendarTitle");
+		const monthTable = document.createElement("tbody");
+		monthTable.id = "monthTable";
+		monthTable.classList.add("hide");
+		var index = 1;
+		for(let i = 0; i < 3; i++){
+			monthTable.insertRow(i);
+			for(let  j = 0; j < 4; j++){
+				monthTable.rows[i].insertCell(j);
+				monthTable.rows[i].cells[j].value = index;
+				monthTable.rows[i].cells[j].innerHTML = index;
+				index++;
+			}
+		}
+		calendarTitle.appendChild(monthTable);
+	},
+
 	//获取时间细节
 	getTimeDetail:function(){
 		const commonYear = [31,28,31,30,31,30,31,31,30,31,30,31];
@@ -184,6 +204,7 @@ Calendar.prototype = {
 		const next = document.getElementById("nextMonth");
 		const titileYear = document.getElementById("titleYear");
 		const titleMonth = document.getElementById("titleMonth");
+		const monthTable = document.getElementById("monthTable");
 		if(target == pre){
 			switch(this.month){
 				case 1:
@@ -203,48 +224,26 @@ Calendar.prototype = {
 					this.month = ++this.month;
 			}
 		}else if(target == titleMonth){
-			this.changeTitle(titleMonth);
-			for (let i = 1; i <= 12; i++) {
-				target.childNodes[i].classList.toggle("hide");
-			}
+			monthTable.classList.toggle("hide");
+			this.changeTitle(monthTable);
 		}
-		titleYear.innerHTML = this.year;
+		titleYear.firstChild.nodeValue = this.year;
 		titleMonth.firstChild.nodeValue = this.month;
 
 		this.getTimeDetail();
 		this.render();
 	},
 
-	changeTitle:function(argument){
+	changeTitle:function(classify){
 		const self = this;
-		if(argument == titleMonth){//目标节点为月份
-			let list = [];
-			for (let i = 1; i <= 12; i++) {
-				let li = document.createElement("li");
-				li.innerHTML = i;
-				li.value = i;
-				li.className = "hide";
-				list.push(li);
-			}
-			if(argument.childNodes.length <= 12){
-				for (let i = 0; i < 12; i++) {
-					argument.appendChild(list[i]);
-				}
-			}
-			EventUtil.addHandler(argument, "click",function(event){
+		if(classify == monthTable){
+			EventUtil.addHandler(classify, "click", function(event) {
 				event = EventUtil.getEvent(event);
-				var selectLi = EventUtil.getTarget(event);
-				console.log(selectLi);
-				self.month = selectLi.value;
-				const titleMonth = document.getElementById("titleMonth");
-				console.log("第一个节点的值:"+titleMonth.firstChild.nodeValue);
-				console.log("self.month:"+self.month);
-				for (let i = 1; i <= 12; i++) {
-					argument.childNodes[i].classList.toggle("hide");
-				}
+				var target = EventUtil.getTarget(event);
+				self.month = target.value;
+				classify.classList.add("hide");
 			});
 		}
-		console.log(this.month);
 	},
 
 }
