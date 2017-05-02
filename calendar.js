@@ -152,8 +152,8 @@ Calendar.prototype = {
 				}
 			}
 		}
-		yearTable.rows[1].cells[0].id = "startYear";
-		yearTable.rows[2].cells[4].id = "endYear";
+		// yearTable.rows[1].cells[0].id = "startYear";
+		// yearTable.rows[2].cells[4].id = "endYear";
 
 		//月份表单
 		var index = 1;
@@ -252,10 +252,10 @@ Calendar.prototype = {
 				default:
 					this.month = ++this.month;
 			}
-		}else if(target == titleYear){
+		}else if(target == titleYear && monthTable.classList.contains("hide")){
 			this.judgeYear();
 			this.changeTitle(yearTable);
-		}else if(target == titleMonth){
+		}else if(target == titleMonth  && yearTable.classList.contains("hide")){
 			monthTable.classList.toggle("hide");
 			this.changeTitle(monthTable);
 		}
@@ -272,29 +272,29 @@ Calendar.prototype = {
 		const nextYear = document.getElementById("nextYear");
 		const startYear = document.getElementById("startYear");
 		const endYear = document.getElementById("endYear");
-		if(classify == yearTable){
-			EventUtil.addHandler(classify, "click", function(event){
-				event = EventUtil.getEvent(event);
-				var target = EventUtil.getTarget(event);
-				if(target == preYear){
-					let index = Number(startYear.value) - 10;
+		EventUtil.addHandler(classify, "click", function(event) {
+			event = EventUtil.getEvent(event);
+			var target = EventUtil.getTarget(event);
+			if (classify == yearTable) {
+				let index;
+				if(target == preYear){		
+					index = Number(startYear.value) - 10;
+					console.log(index);
 					self.refreshYear(index);
 				}else if(target == nextYear){
-					let index = Number(endYear.value) + 1;
+					index = Number(endYear.value) + 1;
 					self.refreshYear(index);
-				}else if(target != preYear ||target != nextYear){
+				}else{
 					self.year = target.value;
+					index = startYear.value;
+					console.log("startYear:"+startYear.value);
 					classify.classList.add("hide");
 				}
-			});
-		}else{
-			EventUtil.addHandler(classify, "click", function(event){
-				event = EventUtil.getEvent(event);
-				var target = EventUtil.getTarget(event);
+			}else{
 				self.month = target.value;
 				classify.classList.add("hide");
-			});
-		}
+			}
+		});
 	},
 
 	//判断当前年份
@@ -338,6 +338,8 @@ Calendar.prototype = {
 				index++;
 			}
 		}
+		yearTable.rows[1].cells[0].id = "startYear";
+		yearTable.rows[2].cells[4].id = "endYear";
 	}
 
 }
