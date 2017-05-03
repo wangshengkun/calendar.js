@@ -276,17 +276,16 @@ Calendar.prototype = {
 			event = EventUtil.getEvent(event);
 			var target = EventUtil.getTarget(event);
 			if (classify == yearTable) {
-				let index;
 				if(target == preYear){		
-					index = Number(startYear.value) - 10;
+					const index = startYear.value - 10;
 					console.log(index);
 					self.refreshYear(index);
 				}else if(target == nextYear){
-					index = Number(endYear.value) + 1;
+					const index = endYear.value + 1;
 					self.refreshYear(index);
 				}else{
 					self.year = target.value;
-					index = startYear.value;
+					const index = startYear.value;
 					console.log("startYear:"+startYear.value);
 					classify.classList.add("hide");
 				}
@@ -306,7 +305,7 @@ Calendar.prototype = {
 		// 	var  = this.year % 2000;
 		// }
 
-		if(1980 <=this.year && this.year < 1990){
+		if(1980 <= this.year && this.year < 1990){
 			index = 1980;
 		}else if(1990 <= this.year && this.year < 2000) {
 			index = 1990;

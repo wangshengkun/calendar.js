@@ -87,7 +87,7 @@
 /*年份选择表格样式*/
 #yearTable{
 	z-index:1;
-	position: relative;
+	position: absolute;
 	left:40px;
 	top:30px;
 }
@@ -108,7 +108,7 @@
 /*月份选择表格样式*/
 #monthTable{
 	z-index:1;
-	position: relative;
+	position: absolute;
 	left:114px;
 	top:30px;
 }
