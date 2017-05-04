@@ -45,6 +45,7 @@ function Calendar(){
 	this.now = new Date();
 	this.year = this.now.getFullYear();
 	this.month = this.now.getMonth()+1;//切记，月份从0开始计数
+	this.date = this.now.getDate();
 	this.createFrame();
 	this.createTable();
 	this.getTimeDetail();
@@ -152,8 +153,8 @@ Calendar.prototype = {
 				}
 			}
 		}
-		// yearTable.rows[1].cells[0].id = "startYear";
-		// yearTable.rows[2].cells[4].id = "endYear";
+		yearTable.rows[1].cells[0].id = "startYear";
+		yearTable.rows[2].cells[4].id = "endYear";
 
 		//月份表单
 		var index = 1;
@@ -204,16 +205,29 @@ Calendar.prototype = {
 		const titleMonth = document.getElementById("titleMonth");
 		for (let i = this.tempDay-1; i < 7; i++) {
 			tbody.rows[1].cells[i].innerHTML = index++;
+			// tbody.rows[1].cells[i].className = "";
 		}
 		for (let j = 2; j < 7; j++) {
 			for (let z = 0; z < 7; z++) {
 				if (index <= this.allDays) {
 					tbody.rows[j].cells[z].innerHTML = index++;
+					// tbody.rows[j].cells[z].className = "";
 				}
 			}
 		}
 		titleYear.firstChild.nodeValue = this.tempYear;
 		titleMonth.firstChild.nodeValue = (this.tempMonth+1);
+
+		if(titleYear.firstChild.nodeValue == this.year && titleMonth.firstChild.nodeValue == this.month){
+			for(let i = 1; i < 7; i++){
+				for(let j = 0; j < 7; j++){
+					tbody.rows[i].cells[j].classList.remove("now");
+					if(tbody.rows[i].cells[j].innerHTML == this.date){
+						tbody.rows[i].cells[j].classList.add("now");
+					}
+				}
+			}
+		}
 	},
 
 	//初始化函数，主要是清空表格中的日期显示
@@ -268,15 +282,19 @@ Calendar.prototype = {
 
 	changeTitle:function(classify){
 		const self = this;
-		const preYear = document.getElementById("preYear");
-		const nextYear = document.getElementById("nextYear");
-		const startYear = document.getElementById("startYear");
-		const endYear = document.getElementById("endYear");
 		EventUtil.addHandler(classify, "click", function(event) {
+			const preYear = document.getElementById("preYear");
+			const nextYear = document.getElementById("nextYear");
+			const startYear = document.getElementById("startYear");
+			const endYear = document.getElementById("endYear");
 			event = EventUtil.getEvent(event);
 			var target = EventUtil.getTarget(event);
+			let count = 0;
 			if (classify == yearTable) {
-				if(target == preYear){		
+
+				if(target == preYear){	
+					console.log(count);
+					count++;	
 					const index = startYear.value - 10;
 					console.log(index);
 					self.refreshYear(index);
@@ -284,6 +302,8 @@ Calendar.prototype = {
 					const index = endYear.value + 1;
 					self.refreshYear(index);
 				}else{
+					console.log(count);
+					count++;
 					self.year = target.value;
 					const index = startYear.value;
 					console.log("startYear:"+startYear.value);
@@ -300,10 +320,6 @@ Calendar.prototype = {
 	judgeYear:function(){
 		const yearTable = document.getElementById("yearTable");
 		var index;
-
-		// if(this.year >= 2000){
-		// 	var  = this.year % 2000;
-		// }
 
 		if(1980 <= this.year && this.year < 1990){
 			index = 1980;
@@ -337,8 +353,8 @@ Calendar.prototype = {
 				index++;
 			}
 		}
-		yearTable.rows[1].cells[0].id = "startYear";
-		yearTable.rows[2].cells[4].id = "endYear";
+		// yearTable.rows[1].cells[0].id = "startYear";
+		// yearTable.rows[2].cells[4].id = "endYear";
 	}
 
 }
