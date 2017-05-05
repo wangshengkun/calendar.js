@@ -19,7 +19,7 @@ var EventUtil = {
 		}
 	},
 	getEvent:function(event){
-		return event ?  event :window.event;
+		return event ?  event : window.event;
 	},
 	getTarget:function(event){
 		return event.target || target.srcElement;
@@ -42,19 +42,21 @@ var EventUtil = {
 
 //日历插件构造函数
 function Calendar(){
+	
 	this.now = new Date();
 	this.year = this.now.getFullYear();
 	this.month = this.now.getMonth()+1;//切记，月份从0开始计数
 	this.date = this.now.getDate();
-	this.createFrame();
-	this.createTable();
+
+	this.createCalendarFrame();
+	this.createHiddenTable();
 	this.getTimeDetail();
 	this.render();
 
 	const title = document.getElementById("calendarTitle");
 	const self = this;
 
-	//为每个实例的标题添加一个点击事件
+	//利用事件委托，为每个实例的标题添加一个点击事件
 	EventUtil.addHandler(title, "click", function(event){
 		event = EventUtil.getEvent(event);
 		var target = EventUtil.getTarget(event);
@@ -66,14 +68,14 @@ Calendar.prototype = {
 	constructor:Calendar,
 
 	//创建日历框架
-	createFrame:function(){
+	createCalendarFrame:function(){
 		const week = ["一","二","三","四","五","六","日"];
 		const calendar = document.createElement("div");
 		const title = document.createElement("div");
 		const dateWrap = document.createElement("div");
 		const pre = document.createElement("a");
 		const next = document.createElement("a");
-		const titleYear = document.createElement("ul");
+		const titleYear = document.createElement("ul");//要改
 		const titleMonth = document.createElement("ul");
 		const yearTxt = document.createTextNode("");
 		const monthTxt = document.createTextNode("");
@@ -127,10 +129,11 @@ Calendar.prototype = {
 	},
 
 	//创建隐藏表单
-	createTable:function(){
+	createHiddenTable:function(){
 		const calendarTitle = document.getElementById("calendarTitle");
 		const yearTable = document.createElement("tbody");
 		const monthTable = document.createElement("tbody");
+		const self = this;
 
 		yearTable.id = "yearTable";
 		yearTable.classList.add("hide");
@@ -154,9 +157,7 @@ Calendar.prototype = {
 			}
 		}
 		yearTable.rows[1].cells[0].id = "startYear";
-		yearTable.rows[2].cells[4].id = "endYear";
-
-		const self = this;	
+		yearTable.rows[2].cells[4].id = "endYear";	
 
 		//月份表单
 		var index = 1;
@@ -180,11 +181,8 @@ Calendar.prototype = {
 			event = EventUtil.getEvent(event);
 			var target = EventUtil.getTarget(event);
 				if(target == preYear){		
-					console.log("前startYear.value:" + startYear.value);
 					const index = startYear.value - 10;
 					self.refreshYear(index);
-					console.log("后startYear.value:" + startYear.value);
-					console.log("index:"+index);
 				}else if(target == nextYear){
 					const index = endYear.value + 1;
 					self.refreshYear(index);
@@ -193,6 +191,7 @@ Calendar.prototype = {
 					yearTable.classList.add("hide");
 				}
 			});
+
 		EventUtil.addHandler(monthTable, "click", function(event){
 			event = EventUtil.getEvent(event);
 			var target = EventUtil.getTarget(event);
@@ -233,28 +232,29 @@ Calendar.prototype = {
 		const tbody = document.getElementById("calendarBody");
 		const titleYear = document.getElementById("titleYear");
 		const titleMonth = document.getElementById("titleMonth");
+
 		for (let i = this.tempDay-1; i < 7; i++) {
 			tbody.rows[1].cells[i].innerHTML = index++;
-			// tbody.rows[1].cells[i].className = "";
 		}
 		for (let j = 2; j < 7; j++) {
 			for (let z = 0; z < 7; z++) {
 				if (index <= this.allDays) {
 					tbody.rows[j].cells[z].innerHTML = index++;
-					// tbody.rows[j].cells[z].className = "";
 				}
 			}
 		}
 		titleYear.firstChild.nodeValue = this.tempYear;
 		titleMonth.firstChild.nodeValue = (this.tempMonth+1);
 
-		if(titleYear.firstChild.nodeValue == this.year && titleMonth.firstChild.nodeValue == this.month){
-			for(let i = 1; i < 7; i++){
-				for(let j = 0; j < 7; j++){
-					tbody.rows[i].cells[j].classList.remove("now");
+		//如果与当前日期相同，则添加样式
+		for(let i = 1; i < 7; i++){
+			for(let j = 0; j < 7; j++){
+				if(this.tempYear == this.now.getFullYear() && (this.tempMonth+1) == this.now.getMonth()+1){
 					if(tbody.rows[i].cells[j].innerHTML == this.date){
-						tbody.rows[i].cells[j].classList.add("now");
+						tbody.rows[i].cells[j].classList.add("today");
 					}
+				}else{
+					tbody.rows[i].cells[j].classList.remove("today");
 				}
 			}
 		}
@@ -298,10 +298,8 @@ Calendar.prototype = {
 			}
 		}else if(target == titleYear && monthTable.classList.contains("hide")){
 			this.judgeYear();
-			// this.changeTitle(yearTable);
 		}else if(target == titleMonth  && yearTable.classList.contains("hide")){
 			monthTable.classList.toggle("hide");
-			// this.changeTitle(monthTable);
 		}
 
 		titleYear.firstChild.nodeValue = this.year;
@@ -309,39 +307,6 @@ Calendar.prototype = {
 		this.getTimeDetail();
 		this.render();
 	},
-
-	// changeTitle:function(classify){
-	// 	const self = this;
-	// 	EventUtil.addHandler(classify, "click", function(event) {
-	// 		const preYear = document.getElementById("preYear");
-	// 		const nextYear = document.getElementById("nextYear");
-	// 		const startYear = document.getElementById("startYear");
-	// 		const endYear = document.getElementById("endYear");
-	// 		event = EventUtil.getEvent(event);
-	// 		var target = EventUtil.getTarget(event);
-	// 		if (classify == yearTable) {
-	// 			if(target == preYear){		
-	// 				console.log("前startYear.value:" + startYear.value);
-	// 				const index = startYear.value - 10;
-	// 				self.refreshYear(index);
-	// 				console.log("后startYear.value:" + startYear.value);
-	// 				console.log("index:"+index);
-	// 				return;
-	// 			}else if(target == nextYear){
-	// 				const index = endYear.value + 1;
-	// 				self.refreshYear(index);
-	// 				return;
-	// 			}else{
-	// 				self.year = target.value;
-	// 				classify.classList.add("hide");
-	// 				return;
-	// 			}
-	// 		}else{
-	// 			self.month = target.value;
-	// 			classify.classList.add("hide");
-	// 		}
-	// 	});
-	// },
 
 	//判断当前年份
 	judgeYear:function(){
@@ -383,4 +348,3 @@ Calendar.prototype = {
 	}
 
 }
-var calendar = new Calendar();

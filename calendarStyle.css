@@ -67,21 +67,12 @@
 	font-size: 16px;
 	font-family: "SimSun","Microsoft YaHei";
 }
-#calendar .weekend{
-	color:#f00;
-}
 #calendar table td{
 	box-sizing: border-box;
 	height: 40px;
 	width: 40px;
 	text-align: center;
 	border:1px solid #ccc;
-}
-#calendar .today{
-	background-color: #ccc;
-}
-#calendar .preDay{
-	color:#ddd;
 }
 
 /*年份选择表格样式*/
@@ -124,13 +115,18 @@
 #yearTable td:hover, #monthTable td:hover{
 	background-color: #ff0;
 }
-.hide{
+
+/*特定的样式*/
+#calendar .hide{
 	display: none;
 }
-.noSelect{
+#calendar .noSelect{
 	cursor: default !important;
 	background-color: #ccc !important;
 }
-.now{
-	background-color: #0f0;
+#calendar .weekend{
+	color:#f00;
+}
+#calendar .today{
+	background-color: #ccc;
 }
