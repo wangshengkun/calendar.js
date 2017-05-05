@@ -89,7 +89,7 @@ Calendar.prototype = {
 		dateWrap.id = "dateWrap";
 		titleYear.id = "titleYear";
 		titleMonth.id = "titleMonth";
-		tbody.id = "calendarBody"
+		tbody.id = "calendarBody";
 
 		//创建表格
 		for(let i = 0; i < 7; i++){
@@ -156,6 +156,8 @@ Calendar.prototype = {
 		yearTable.rows[1].cells[0].id = "startYear";
 		yearTable.rows[2].cells[4].id = "endYear";
 
+		const self = this;	
+
 		//月份表单
 		var index = 1;
 		for(let i = 0; i < 3; i++){
@@ -169,6 +171,34 @@ Calendar.prototype = {
 		}
 		calendarTitle.appendChild(yearTable);
 		calendarTitle.appendChild(monthTable);
+
+		EventUtil.addHandler(yearTable, "click", function(event){
+			const preYear = document.getElementById("preYear");
+			const nextYear = document.getElementById("nextYear");
+			const startYear = document.getElementById("startYear");
+			const endYear = document.getElementById("endYear");
+			event = EventUtil.getEvent(event);
+			var target = EventUtil.getTarget(event);
+				if(target == preYear){		
+					console.log("前startYear.value:" + startYear.value);
+					const index = startYear.value - 10;
+					self.refreshYear(index);
+					console.log("后startYear.value:" + startYear.value);
+					console.log("index:"+index);
+				}else if(target == nextYear){
+					const index = endYear.value + 1;
+					self.refreshYear(index);
+				}else{
+					self.year = target.value;
+					yearTable.classList.add("hide");
+				}
+			});
+		EventUtil.addHandler(monthTable, "click", function(event){
+			event = EventUtil.getEvent(event);
+			var target = EventUtil.getTarget(event);
+			self.month = target.value;
+			monthTable.classList.add("hide");
+		});	
 	},
 
 	//获取时间细节
@@ -268,10 +298,10 @@ Calendar.prototype = {
 			}
 		}else if(target == titleYear && monthTable.classList.contains("hide")){
 			this.judgeYear();
-			this.changeTitle(yearTable);
+			// this.changeTitle(yearTable);
 		}else if(target == titleMonth  && yearTable.classList.contains("hide")){
 			monthTable.classList.toggle("hide");
-			this.changeTitle(monthTable);
+			// this.changeTitle(monthTable);
 		}
 
 		titleYear.firstChild.nodeValue = this.year;
@@ -280,41 +310,38 @@ Calendar.prototype = {
 		this.render();
 	},
 
-	changeTitle:function(classify){
-		const self = this;
-		EventUtil.addHandler(classify, "click", function(event) {
-			const preYear = document.getElementById("preYear");
-			const nextYear = document.getElementById("nextYear");
-			const startYear = document.getElementById("startYear");
-			const endYear = document.getElementById("endYear");
-			event = EventUtil.getEvent(event);
-			var target = EventUtil.getTarget(event);
-			let count = 0;
-			if (classify == yearTable) {
-
-				if(target == preYear){	
-					console.log(count);
-					count++;	
-					const index = startYear.value - 10;
-					console.log(index);
-					self.refreshYear(index);
-				}else if(target == nextYear){
-					const index = endYear.value + 1;
-					self.refreshYear(index);
-				}else{
-					console.log(count);
-					count++;
-					self.year = target.value;
-					const index = startYear.value;
-					console.log("startYear:"+startYear.value);
-					classify.classList.add("hide");
-				}
-			}else{
-				self.month = target.value;
-				classify.classList.add("hide");
-			}
-		});
-	},
+	// changeTitle:function(classify){
+	// 	const self = this;
+	// 	EventUtil.addHandler(classify, "click", function(event) {
+	// 		const preYear = document.getElementById("preYear");
+	// 		const nextYear = document.getElementById("nextYear");
+	// 		const startYear = document.getElementById("startYear");
+	// 		const endYear = document.getElementById("endYear");
+	// 		event = EventUtil.getEvent(event);
+	// 		var target = EventUtil.getTarget(event);
+	// 		if (classify == yearTable) {
+	// 			if(target == preYear){		
+	// 				console.log("前startYear.value:" + startYear.value);
+	// 				const index = startYear.value - 10;
+	// 				self.refreshYear(index);
+	// 				console.log("后startYear.value:" + startYear.value);
+	// 				console.log("index:"+index);
+	// 				return;
+	// 			}else if(target == nextYear){
+	// 				const index = endYear.value + 1;
+	// 				self.refreshYear(index);
+	// 				return;
+	// 			}else{
+	// 				self.year = target.value;
+	// 				classify.classList.add("hide");
+	// 				return;
+	// 			}
+	// 		}else{
+	// 			self.month = target.value;
+	// 			classify.classList.add("hide");
+	// 		}
+	// 	});
+	// },
 
 	//判断当前年份
 	judgeYear:function(){
@@ -353,8 +380,6 @@ Calendar.prototype = {
 				index++;
 			}
 		}
-		// yearTable.rows[1].cells[0].id = "startYear";
-		// yearTable.rows[2].cells[4].id = "endYear";
 	}
 
 }
