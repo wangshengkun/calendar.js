@@ -1,44 +1,81 @@
-//跨浏览器事件函数
+//跨浏览器事件处理函数之延迟加载
 var EventUtil = {
 	addHandler:function(element, type, handler){
 		if(element.addEventListener){
-			element.addEventListener(type, handler, false);			
+			addHandler = function(element, type, handler){
+				element.addEventListener(type, handler, false);
+			}
 		}else if(element.attachEvent){
-			element.attachEvent("on" + type, handler);
+			addHandler = function(element, type, handler){
+				element.attachEvent("on" + type, handler);
+			}
 		}else{
-			element["on" + type] = handler;
+			addHandler = function(element, type, handler){
+				element["on" + type] = handler;
+			}
 		}
+		addHandler(element, type, handler);
 	},
 	removeHandler:function(element, type, handler){
 		if(element.removeEventListener){
-			element.removeEventListener(type, handler, false);
+			removeHandler = function(element, type, handler){
+				element.removeEventLisener(type, handler, false);
+			}
 		}else if(element.detachEvent){
-			element.detachEvent("on" + type, handler);
+			removeHandler = function(element, type, handler){
+				element.detachEvent("on" + type, handler);
+			}
 		}else{
-			element["on" + type] = null;
+			removeHandler = function(element, type, handler){
+				element["on" + type] = null;
+			}
 		}
+		removeHandler(element, type, handler);
 	},
 	getEvent:function(event){
-		return event ?  event : window.event;
+		return event ? event : window.event;
 	},
 	getTarget:function(event){
-		return event.target || target.srcElement;
+		return event.target || event.srcElement; 
 	},
 	stopPropagation:function(event){
 		if(event.stopPropagation){
-			event.stopPropagation();
+			stopPropagation = function(event){
+				event.stopPropagation();
+			}
 		}else{
-			event.cancleBubble = true;
+			stopPropagation = function(event){
+				event.cancaleBubble = true;
+			}
 		}
+		stopPropagation(event);
 	},
 	preventDefault:function(event){
 		if(event.preventDefault){
-			event.preventDefault();
+			preventDefault = function(evnet){
+				event.preventDefault();
+			}
 		}else{
-			event.returnValue = false;
+			preventDefault = function(event){
+				event.returnValue = false;
+			}
 		}
+		preventDefault(event);
 	}
 };
+
+//创建节点函数
+function createNode(tag, id){
+	var tag = Array.prototype.shift.apply(arguments),
+		dom = null;
+	if(tag !== ""){
+		dom = document.createElement(tag);
+	}else{
+		dom = document.createTextNode(tag);
+	}
+	dom.id = id;
+	return dom;
+}
 
 //日历插件构造函数
 function Calendar(){
@@ -70,28 +107,20 @@ Calendar.prototype = {
 	//创建日历框架
 	createCalendarFrame:function(){
 		const week = ["一","二","三","四","五","六","日"];
-		const calendar = document.createElement("div");
-		const title = document.createElement("div");
-		const dateWrap = document.createElement("div");
-		const pre = document.createElement("a");
-		const next = document.createElement("a");
-		const titleYear = document.createElement("span");//要改
-		const titleMonth = document.createElement("span");
-		const yearTxt = document.createTextNode("");
-		const monthTxt = document.createTextNode("");
-		const yearSign = document.createElement("span");
-		const monthSign = document.createElement("span");
-		const table = document.createElement("table");
-		const tbody = document.createElement("tbody");
-
-		calendar.id = "calendar"
-		title.id = "calendarTitle";
-		pre.id = "preMonth";
-		next.id = "nextMonth";
-		dateWrap.id = "dateWrap";
-		titleYear.id = "titleYear";
-		titleMonth.id = "titleMonth";
-		tbody.id = "calendarBody";
+		
+		const calendar = createNode("div", "calendar");
+		const title = createNode("div", "calendarTitle");
+		const dateWrap = createNode("div", "dateWrap");
+		const pre = createNode("a", "preMonth");
+		const next = createNode("a", "nextMonth");
+		const titleYear = createNode("span", "titleYear");
+		const titleMonth = createNode("span", "titleMonth");
+		const yearTxt = createNode("", "yearTxt");
+		const monthTxt = createNode("", "monthTxt");
+		const yearSign = createNode("span", "yearSign");
+		const monthSign = createNode("span", "monthSign");
+		const table = createNode("table", "calendarTable");
+		const tbody = createNode("tbody", "calendarBody");
 
 		//创建表格
 		for(let i = 0; i < 7; i++){
@@ -113,6 +142,7 @@ Calendar.prototype = {
 		next.innerHTML = ">";
 		yearSign.innerHTML = "年";
 		monthSign.innerHTML = "月";
+
 		titleYear.appendChild(yearTxt);
 		titleMonth.appendChild(monthTxt);
 		title.appendChild(pre);
@@ -131,13 +161,11 @@ Calendar.prototype = {
 	//创建隐藏表单
 	createHiddenTable:function(){
 		const calendarTitle = document.getElementById("calendarTitle");
-		const yearTable = document.createElement("tbody");
-		const monthTable = document.createElement("tbody");
+		const yearTable = createNode("tbody", "yearTable");
+		const monthTable = createNode("tbody", "monthTable");
 		const self = this;
 
-		yearTable.id = "yearTable";
 		yearTable.classList.add("hide");
-		monthTable.id = "monthTable";
 		monthTable.classList.add("hide");
 
 		//年份表单
