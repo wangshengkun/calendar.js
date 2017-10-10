@@ -105,6 +105,8 @@
 }
 #calendar .noSelect{
 	cursor: default !important;
+}
+#calendar .noSelect:hover{
 	background-color: #ccc !important;
 }
 #calendar .weekend{

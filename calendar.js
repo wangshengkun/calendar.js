@@ -181,14 +181,18 @@ Calendar.prototype = {
 			yearTable.insertRow(i);
 			for (let j = 0; j < 5; j++) {
 				yearTable.rows[i].insertCell(j);
-				if (i === 0 && (j !== 0 || j !== 4)) {
-					yearTable.rows[i].cells[j].classList.add("noSelect");
-				}
 				if(i >= 1){
 					yearTable.rows[i].cells[j].innerHTML = year++;
 				}
 			}
 		}
+
+		yearTable.rows[0].cells[1].value = this.year;
+		yearTable.rows[0].cells[2].value = this.year;
+		yearTable.rows[0].cells[3].value = this.year;
+		yearTable.rows[0].cells[1].classList.add("noSelect");
+		yearTable.rows[0].cells[2].classList.add("noSelect");
+		yearTable.rows[0].cells[3].classList.add("noSelect");		
 
 		yearTable.rows[0].cells[0].innerHTML = "<";
 		yearTable.rows[0].cells[0].id = "preYear";
@@ -233,14 +237,20 @@ Calendar.prototype = {
 			event = EventUtil.getEvent(event);
 			var target = EventUtil.getTarget(event);
 			if(target === preYear){
-				const index = startYear.value - 10;
-				self.refreshYear(index);
+				const index = startYear.innerHTML - 10;
+				if(index > 1970){
+					self.refreshYear(index);
+				}
 			}else if(target === nextYear) {
-				const index = endYear.value + 1;
-				self.refreshYear(index);
+				const index = parseInt(endYear.innerHTML) + 1;
+				if(index < 2030){
+					self.refreshYear(index);
+				}
 			}else{
-				self.year = target.value;
+				self.year = target.innerHTML || target.value;
 				yearTable.classList.add("hide");
+				self.judgeYear();
+				self.render();
 			}
 		}
 
@@ -359,7 +369,6 @@ Calendar.prototype = {
 					this.month = ++this.month;
 			}
 		}else if(target === titleYear && monthTable.classList.contains("hide")){
-			// this.unsolved();
 			yearTable.classList.toggle("hide");
 		}else if(target === titleMonth  && yearTable.classList.contains("hide")){
 			monthTable.classList.toggle("hide");
@@ -367,33 +376,13 @@ Calendar.prototype = {
 
 		titleYear.firstChild.nodeValue = this.year;
 		titleMonth.firstChild.nodeValue = this.month;
+
+		yearTable.rows[0].cells[1].value = this.year;
+		yearTable.rows[0].cells[2].value = this.year;
+		yearTable.rows[0].cells[3].value = this.year;
+
 		this.judgeYear();
 		this.render();
-	},
-
-	//判断当前年份,该函数需重构
-	unsolved:function(){
-		const yearTable = document.getElementById("yearTable");
-		var index;
-
-		if(1980 <= this.year && this.year < 1990){
-			index = 1980;
-		}else if(1990 <= this.year && this.year < 2000) {
-			index = 1990;
-		}else if(2000 <= this.year && this.year < 2010) {
-			index = 2000;
-		}else if(2010 <= this.year && this.year < 2020) {
-			index = 2010;	
-		}else if(2020 <= this.year && this.year < 2030) {
-			index = 2020;	
-		}else{
-			alert("当前年份超出限制,无法选择年份。");
-			//利用return语句停止执行剩余语句
-			return;
-		}
-		console.log(index);
-			this.refreshYear(index);
-			yearTable.classList.toggle("hide");	
 	},
 
 	//刷新年份表单中的年份
@@ -410,5 +399,4 @@ Calendar.prototype = {
 			}
 		}
 	}
-
 }
