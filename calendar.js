@@ -1,3 +1,36 @@
+//命名空间
+var Tiro = {
+	namespace:function(ns){
+		var parts = ns.split("."),
+		object = this,
+		i, len;
+
+		for(i = 0, len = parts.length; i < len; i++){
+			if(!object[parts[i]]){
+				object[parts[i]] = {};
+			}
+			object = object[parts[i]];
+		}
+		return object;
+	}
+};
+
+Tiro.namespace("Dom.createNode");
+
+Tiro.Dom.createNode = function(tag, id){
+	var tag = Array.prototype.shift.apply(arguments),
+		dom = null;
+	if(tag !== ""){
+		dom = document.createElement(tag);
+	}else{
+		dom = document.createTextNode(tag);
+	}
+	dom.id = id;
+	return dom;
+};
+
+Tiro.namespace("Event");
+
 //跨浏览器事件处理函数之延迟加载
 var EventUtil = {
 	addHandler:function(element, type, handler){
@@ -64,19 +97,6 @@ var EventUtil = {
 	}
 };
 
-//创建节点函数
-function createNode(tag, id){
-	var tag = Array.prototype.shift.apply(arguments),
-		dom = null;
-	if(tag !== ""){
-		dom = document.createElement(tag);
-	}else{
-		dom = document.createTextNode(tag);
-	}
-	dom.id = id;
-	return dom;
-}
-
 //日历插件构造函数
 function Calendar(){
 	
@@ -112,19 +132,19 @@ Calendar.prototype = {
 	createCalendarFrame:function(){
 		const week = ["一","二","三","四","五","六","日"];
 		
-		const calendar = createNode("div", "calendar");
-		const title = createNode("div", "calendarTitle");
-		const dateWrap = createNode("div", "dateWrap");
-		const pre = createNode("a", "preMonth");
-		const next = createNode("a", "nextMonth");
-		const titleYear = createNode("span", "titleYear");
-		const titleMonth = createNode("span", "titleMonth");
-		const yearTxt = createNode("", "yearTxt");
-		const monthTxt = createNode("", "monthTxt");
-		const yearSign = createNode("span", "yearSign");
-		const monthSign = createNode("span", "monthSign");
-		const table = createNode("table", "calendarTable");
-		const tbody = createNode("tbody", "calendarBody");
+		const calendar = Tiro.Dom.createNode("div", "calendar");
+		const calendarTitle = Tiro.Dom.createNode("div", "calendarTitle");
+		const dateWrap = Tiro.Dom.createNode("div", "dateWrap");
+		const pre = Tiro.Dom.createNode("a", "preMonth");
+		const next = Tiro.Dom.createNode("a", "nextMonth");
+		const titleYear = Tiro.Dom.createNode("span", "titleYear");
+		const titleMonth = Tiro.Dom.createNode("span", "titleMonth");
+		const yearTxt = Tiro.Dom.createNode("", "yearTxt");
+		const monthTxt = Tiro.Dom.createNode("", "monthTxt");
+		const yearSign = Tiro.Dom.createNode("span", "yearSign");
+		const monthSign = Tiro.Dom.createNode("span", "monthSign");
+		const table = Tiro.Dom.createNode("table", "calendarTable");
+		const tbody = Tiro.Dom.createNode("tbody", "calendarBody");
 
 		//创建表格
 		for(let i = 0; i < 7; i++){
@@ -149,15 +169,15 @@ Calendar.prototype = {
 
 		titleYear.appendChild(yearTxt);
 		titleMonth.appendChild(monthTxt);
-		title.appendChild(pre);
-		title.appendChild(dateWrap);
+		calendarTitle.appendChild(pre);
+		calendarTitle.appendChild(dateWrap);
 		dateWrap.appendChild(titleYear);
 		dateWrap.appendChild(yearSign);
 		dateWrap.appendChild(titleMonth);
 		dateWrap.appendChild(monthSign);
-		title.appendChild(next);
+		calendarTitle.appendChild(next);
 		table.appendChild(tbody);
-		calendar.appendChild(title);
+		calendar.appendChild(calendarTitle);
 		calendar.appendChild(table);
 		document.body.appendChild(calendar);
 	},
@@ -165,28 +185,33 @@ Calendar.prototype = {
 	//创建隐藏的年份选择表
 	createHiddenYear:function(){
 		const calendarTitle = document.getElementById("calendarTitle");
-		const yearTable = createNode("tbody", "yearTable");
+		const yearTable = Tiro.Dom.createNode("tbody", "yearTable");
 
-		//该部分需提炼为函数
-		var year = this.year,
-			yearTxt = year.toString();
-		if(yearTxt[3] !== 0){
-			year = year - parseInt(yearTxt[3]);
-		}else{
-			year = year - 10;
+		function catchYear(year){//获取用于渲染年份选择表单的初始年份
+			var year = year,
+				yearTxt = year.toString();
+			if(yearTxt[3] !== 0){//若该年份的末尾不为0
+				year -= parseInt(yearTxt[3]);
+			}else{//该年份末尾为0
+				year -= 10;
+			}
+			return year;
 		}
 
+		var startYear = catchYear(this.year);
 
 		for (let i = 0; i < 3; i++) {
 			yearTable.insertRow(i);
 			for (let j = 0; j < 5; j++) {
 				yearTable.rows[i].insertCell(j);
 				if(i >= 1){
-					yearTable.rows[i].cells[j].innerHTML = year++;
+					//初次创建年份选择表时会依据当前的时间来渲染年份
+					yearTable.rows[i].cells[j].innerHTML = startYear++;
 				}
 			}
 		}
-
+		//年份选择表单第一行为向前/后跳转年份，该行中部的三个元素默认赋值为当前年份，这样点击
+		//该td元素时用户会单纯地认为没有刷新表单而是隐藏表单，详见jumpYear()函数
 		yearTable.rows[0].cells[1].value = this.year;
 		yearTable.rows[0].cells[2].value = this.year;
 		yearTable.rows[0].cells[3].value = this.year;
@@ -207,16 +232,16 @@ Calendar.prototype = {
 
 	createHiddenMonth:function(){
 		const calendarTitle = document.getElementById("calendarTitle");
-		const monthTable = createNode("tbody", "monthTable");
+		const monthTable = Tiro.Dom.createNode("tbody", "monthTable");
 
-		var index = 1;
+		var startMonth = 1;
 		for(let i = 0; i < 3; i++){
 			monthTable.insertRow(i);
 			for(let  j = 0; j < 4; j++){
 				monthTable.rows[i].insertCell(j);
-				monthTable.rows[i].cells[j].value = index;
-				monthTable.rows[i].cells[j].innerHTML = index;
-				index++;
+				monthTable.rows[i].cells[j].value = startMonth;
+				monthTable.rows[i].cells[j].innerHTML = startMonth;
+				startMonth++;
 			}
 		}
 		
@@ -303,7 +328,7 @@ Calendar.prototype = {
 				}
 			}
 		})();
-
+		//获取该月份的第一天的星期数
 		const tempDate = new Date(this.year, this.month-1);
 		var	day = tempDate.getDay();
 		if(day === 0){
@@ -313,21 +338,21 @@ Calendar.prototype = {
 		const tbody = document.getElementById("calendarBody");
 		const titleYear = document.getElementById("titleYear");
 		const titleMonth = document.getElementById("titleMonth");
-		var index = 1;
+		var startDay = 1;
 
 		for (let i = day-1; i < 7; i++) {
-			tbody.rows[1].cells[i].innerHTML = index++;
+			tbody.rows[1].cells[i].innerHTML = startDay++;
 		}
 		for (let j = 2; j < 7; j++) {
 			for (let z = 0; z < 7; z++) {
-				if (index <= this.allDays) {
-					tbody.rows[j].cells[z].innerHTML = index++;
+				if (startDay <= this.allDays) {
+					tbody.rows[j].cells[z].innerHTML = startDay++;
 				}
 			}
 		}
 
-		titleYear.firstChild.nodeValue = this.year;
-		titleMonth.firstChild.nodeValue = this.month;
+		this.changeShowTime(titleYear, this.year);
+		this.changeShowTime(titleMonth, this.month);
 
 		//如果与当前日期相同，则添加样式
 		for(let i = 1; i < 7; i++){
@@ -374,8 +399,8 @@ Calendar.prototype = {
 			monthTable.classList.toggle("hide");
 		}
 
-		titleYear.firstChild.nodeValue = this.year;
-		titleMonth.firstChild.nodeValue = this.month;
+		this.changeShowTime(titleYear, this.year);
+		this.changeShowTime(titleMonth, this.month);
 
 		yearTable.rows[0].cells[1].value = this.year;
 		yearTable.rows[0].cells[2].value = this.year;
@@ -388,9 +413,6 @@ Calendar.prototype = {
 	//刷新年份表单中的年份
 	refreshYear:function(index){
 		const yearTable = document.getElementById("yearTable");
-		yearTable.rows[0].cells[1].value = this.year;
-		yearTable.rows[0].cells[2].value = this.year;
-		yearTable.rows[0].cells[3].value = this.year;
 		for(let i = 1; i < 3; i++){
 			for(let j = 0; j < 5; j++){
 				yearTable.rows[i].cells[j].value = index;
@@ -398,5 +420,9 @@ Calendar.prototype = {
 				index++;
 			}
 		}
+	},
+
+	changeShowTime:function(dom, time){
+			dom.firstChild.nodeValue = time;
 	}
 }
