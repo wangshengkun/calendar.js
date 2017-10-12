@@ -15,7 +15,8 @@ var Tiro = {
 	}
 };
 
-Tiro.namespace("Dom.createNode");
+//DOM操作函数集
+Tiro.namespace("Dom");
 
 Tiro.Dom.createNode = function(tag, id){
 	var tag = Array.prototype.shift.apply(arguments),
@@ -29,10 +30,10 @@ Tiro.Dom.createNode = function(tag, id){
 	return dom;
 };
 
+//事件操作函数集
 Tiro.namespace("Event");
 
-//跨浏览器事件处理函数之延迟加载
-var EventUtil = {
+Tiro.Event.EventUtil = {
 	addHandler:function(element, type, handler){
 		if(element.addEventListener){
 			addHandler = function(element, type, handler){
@@ -97,8 +98,11 @@ var EventUtil = {
 	}
 };
 
-//日历插件构造函数
-function Calendar(){
+//组件集合
+Tiro.namespace("Component");
+
+//日历组件构造函数
+Tiro.Component.Calendar = function(){
 	
 	this.now = new Date();
 	this.year = this.now.getFullYear();
@@ -110,7 +114,6 @@ function Calendar(){
 	this.createHiddenMonth();
 	this.jumpYear();
 	this.jumpMonth();
-	this.judgeYear();
 	this.render();
 	// this.init();
 
@@ -118,15 +121,15 @@ function Calendar(){
 	const self = this;
 
 	//利用事件委托，为每个实例的标题添加一个点击事件
-	EventUtil.addHandler(title, "click", function(event){
-		event = EventUtil.getEvent(event);
-		var target = EventUtil.getTarget(event);
+	Tiro.Event.EventUtil.addHandler(title, "click", function(event){
+		event = Tiro.Event.EventUtil.getEvent(event);
+		var target = Tiro.Event.EventUtil.getTarget(event);
 		self.changeDate(target);
 	});
 }
 
-Calendar.prototype = {
-	constructor:Calendar,
+Tiro.Component.Calendar.prototype = {
+	constructor:Tiro.Component.Calendar,
 
 	//创建日历框架
 	createCalendarFrame:function(){
@@ -187,18 +190,7 @@ Calendar.prototype = {
 		const calendarTitle = document.getElementById("calendarTitle");
 		const yearTable = Tiro.Dom.createNode("tbody", "yearTable");
 
-		function catchYear(year){//获取用于渲染年份选择表单的初始年份
-			var year = year,
-				yearTxt = year.toString();
-			if(yearTxt[3] !== 0){//若该年份的末尾不为0
-				year -= parseInt(yearTxt[3]);
-			}else{//该年份末尾为0
-				year -= 10;
-			}
-			return year;
-		}
-
-		var startYear = catchYear(this.year);
+		var startYear = Tiro.Component.Calendar.auxMethod.catchYear(this.year);
 
 		for (let i = 0; i < 3; i++) {
 			yearTable.insertRow(i);
@@ -259,11 +251,11 @@ Calendar.prototype = {
 			const startYear = document.getElementById("startYear");
 			const endYear = document.getElementById("endYear");
 
-			event = EventUtil.getEvent(event);
-			var target = EventUtil.getTarget(event);
+			event = Tiro.Event.EventUtil.getEvent(event);
+			var target = Tiro.Event.EventUtil.getTarget(event);
 			if(target === preYear){
 				const index = startYear.innerHTML - 10;
-				if(index > 1970){
+				if(index > 1970){//年份上下限，需修改
 					self.refreshYear(index);
 				}
 			}else if(target === nextYear) {
@@ -274,12 +266,11 @@ Calendar.prototype = {
 			}else{
 				self.year = target.innerHTML || target.value;
 				yearTable.classList.add("hide");
-				self.judgeYear();
 				self.render();
 			}
 		}
 
-		EventUtil.addHandler(yearTable, "click", function(event){
+		Tiro.Event.EventUtil.addHandler(yearTable, "click", function(event){
 			changeYear(event);
 		});
 	},
@@ -289,35 +280,22 @@ Calendar.prototype = {
 		const self = this;
 
 		function changeMonth(event){
-			event = EventUtil.getEvent(event);
-			var target = EventUtil.getTarget(event);
+			event = Tiro.Event.EventUtil.getEvent(event);
+			var target = Tiro.Event.EventUtil.getTarget(event);
 			self.month = target.value;
 			monthTable.classList.add("hide");
 		}
 
-		EventUtil.addHandler(monthTable, "click", function(event){
+		Tiro.Event.EventUtil.addHandler(monthTable, "click", function(event){
 			changeMonth(event);
 		});
 	},
 
-	//判断平/闰年
-	judgeYear:function(){
-		const commonYear = [31,28,31,30,31,30,31,31,30,31,30,31];
-		const leapYear = [31,29,31,30,31,30,31,31,30,31,30,31];
-
-		function isLeapYear(){
-			return this.year % 400 === 0 || (this.year % 4 === 0 && this.yrar % 100 !== 0);
-		}
-
-		if(isLeapYear()){//闰年
-			this.allDays = leapYear[this.month-1];
-		}else{//平年
-			this.allDays = commonYear[this.month-1];
-		}
-	},
-
 	//渲染函数
 	render:function(){
+
+		var allDays = Tiro.Component.Calendar.auxMethod.judgeYear(this.year, this.month);
+
 		//清空表格中的日期显示
 		(function(){
 			const tbody = document.getElementById("calendarBody");
@@ -328,6 +306,7 @@ Calendar.prototype = {
 				}
 			}
 		})();
+
 		//获取该月份的第一天的星期数
 		const tempDate = new Date(this.year, this.month-1);
 		var	day = tempDate.getDay();
@@ -345,7 +324,7 @@ Calendar.prototype = {
 		}
 		for (let j = 2; j < 7; j++) {
 			for (let z = 0; z < 7; z++) {
-				if (startDay <= this.allDays) {
+				if (startDay <= allDays) {
 					tbody.rows[j].cells[z].innerHTML = startDay++;
 				}
 			}
@@ -406,7 +385,6 @@ Calendar.prototype = {
 		yearTable.rows[0].cells[2].value = this.year;
 		yearTable.rows[0].cells[3].value = this.year;
 
-		this.judgeYear();
 		this.render();
 	},
 
@@ -423,6 +401,58 @@ Calendar.prototype = {
 	},
 
 	changeShowTime:function(dom, time){
-			dom.firstChild.nodeValue = time;
+		dom.firstChild.nodeValue = time;
+	}
+}
+
+//专属日历组件的辅助函数集
+Tiro.Component.Calendar.auxMethod = {
+	//判断平/闰年
+	judgeYear:function(year, month){
+		const commonYear = [31,28,31,30,31,30,31,31,30,31,30,31];
+		const leapYear = [31,29,31,30,31,30,31,31,30,31,30,31];
+		var allDays;
+
+		function isLeapYear(){
+			return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0);
+		}
+
+		if(isLeapYear()){//闰年
+			allDays = leapYear[month-1];
+		}else{//平年
+			allDays = commonYear[month-1];
+		}
+		return allDays;
+	},
+
+	//获取用于渲染年份选择表单的初始年份
+	catchYear:function(year){
+		var year = year,
+			yearTxt = year.toString();
+		if(yearTxt[3] !== 0){//若该年份的末尾不为0
+			year -= parseInt(yearTxt[3]);
+		}else{//该年份末尾为0
+			year -= 10;
+		}
+		return year;
+	},
+	//判断年份是否为非零的四位整数
+	yearRule:function(year){
+		if(typeof year === "number" && year > 0 && year.toString.length === 4){
+			return true;
+		}
+	}
+};
+
+//专属日历组件的用户操作方法集
+Tiro.Component.Calendar.User = {
+	//定制年份跳转的上下限
+	customizeYear:function(start, end){
+		var rule = Tiro.Component.Calendar.auxMethod.yearRule;
+		if(rule(start) && rule(end)){
+			//需填充
+		}else{
+			throw TypeError("参数类型必须为非零的四位正整数");
+		}
 	}
 }
