@@ -12,7 +12,13 @@ html, body{
 </style>
 </head>
 <body>
+	<input type="text">
 <script type="text/javascript" src="calendar.js"></script>
-<script>var calendar = new Tiro.Component.Calendar();</script>
+<script>
+	var input = document.getElementsByTagName("input")[0];
+	var calendar = new Tiro.Component.Calendar();
+	Tiro.Component.Calendar.User.customizeYear(calendar, 1950, 2040);
+	Tiro.Component.Calendar.User.registerTime(input, "--");
+</script>
 </body>
 </html>
