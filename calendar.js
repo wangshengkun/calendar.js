@@ -98,6 +98,58 @@ Tiro.Event = {
 	}
 };
 
+//设计模式集
+Tiro.namespace("Pattern");
+
+//观察者模式
+Tiro.Pattern.Observer = (function(){
+	var clientList = {},
+		listen,
+		trigger,
+		remove;
+
+	listen = function(key, fn){
+		if(!clientList[key]){
+			clientList[key] = [];
+		}
+		clientList[key].push(fn);
+	};
+
+	trigger = function(){
+		var key = Array.prototype.shift.call(arguments),
+			fns = clientList[key];
+		if(!fns || fns.length === 0){
+			return false;
+		}
+		for(var i = 0, fn; fn = fns[i++];){
+			fn.apply(this, arguments);
+		}
+	};
+
+	remove = function(key, fn){
+		var fns = clientList[key];
+		if(!fns){
+			return false;
+		}
+		if(!fn){
+			fns && (fns.length = 0);
+		}else{
+			for(var l = fns.length-1; l >= 0; l--){
+				var _fn = fns[l];
+				if(_fn === fn){
+					fns.splice(i, 1);
+				}
+			}
+		}
+	};
+
+	return{
+		listen:listen,
+		trigger:trigger,
+		remove:remove
+	}
+})();
+
 //组件集合
 Tiro.namespace("Component");
 
@@ -266,7 +318,7 @@ Tiro.Component.Calendar.prototype = {
 			var target = Tiro.Event.getTarget(event);
 			if(target === preYear){
 				const index = startYear.innerHTML - 10;
-				if(index >= (self.startYear || 1970)){//年份上下限，需修改
+				if(index >= (self.startYear || 1970)){
 					self.refreshYear(index);
 				}
 			}else if(target === nextYear) {
@@ -275,7 +327,7 @@ Tiro.Component.Calendar.prototype = {
 					self.refreshYear(index);
 				}
 			}else{
-				self.year = target.innerHTML || target.value;
+				self.year = parseInt(target.innerHTML) || target.value;
 				yearTable.classList.add("hide");
 				self.render();
 			}
@@ -420,10 +472,8 @@ Tiro.Component.Calendar.prototype = {
 
 	printTime:function(target){
 		if(target.value !== ""){
-			console.log(this.year, this.month, parseInt(target.innerHTML));
-			//添加观察者模式，将点击的日期显示在用户指定的节点上
-		}
-		
+			Tiro.Pattern.Observer.trigger("printTime", this.year, this.month, parseInt(target.innerHTML));
+		}	
 	}
 }
 
@@ -458,11 +508,21 @@ Tiro.Component.Calendar.auxMethod = {
 		}
 		return year;
 	},
+
 	//判断年份是否为非零的四位整数
 	yearRule:function(year){
 		var yearTxt = year.toString();
 		if(typeof year === "number" && year > 0 && yearTxt.length === 4 && parseInt(yearTxt[3]) === 0){
 			return true;
+		}
+	},
+
+	//为个位数添加十位
+	addPrefix:function(time){
+		if(time < 10){
+			return "0" + time;
+		}else{
+			return time;
 		}
 	}
 };
@@ -482,7 +542,11 @@ Tiro.Component.Calendar.User = {
 	//将用户选择的时间显示在用户的指定节点上
 	registerTime:function(dom, separator){
 		var separator = separator || " "; 
-		dom.value = "待定";
-		//添加观察者模式
+		Tiro.Pattern.Observer.listen("printTime", function(year, month, date){
+			var month = Tiro.Component.Calendar.auxMethod.addPrefix(month),
+				date = Tiro.Component.Calendar.auxMethod.addPrefix(date);
+
+			dom.value = year + separator + month + separator + date;
+		});
 	}
 }
