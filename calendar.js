@@ -472,9 +472,18 @@ Tiro.Component.Calendar.prototype = {
 
 	printTime:function(target){
 		if(target.value !== ""){
+			// Tiro.Event.addHandler(target, "mousedown", function(){
+			// 	target.classList.add("click");
+			// })
 			Tiro.Pattern.Observer.trigger("printTime", this.year, this.month, parseInt(target.innerHTML));
 		}	
 	}
+/*	hideSelection:function(){
+		var yearTable = document.getElementById("yearTable"),
+			monthTable = document.getElementById("monthTable");
+		yearTable.classList.add("hide");
+		monthTable.classList.add("hide");
+}*/
 }
 
 //专属日历组件的辅助函数集

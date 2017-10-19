@@ -99,6 +99,11 @@
 	background-color: #ff0;
 }
 
+/*日期选择样式表*/
+/*.click{
+	font-weight: bolder;
+}*/
+
 /*特定的样式*/
 #calendar .hide{
 	display: none;
