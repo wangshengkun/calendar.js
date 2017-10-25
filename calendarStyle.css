@@ -17,13 +17,16 @@
 }
 #preMonth{
 	left:0px;
-	width:40px;
-	font-weight: bolder;
 }
 #nextMonth{
 	right:0px;
+}
+#preMonth, #nextMonth{
 	width:40px;
+	height: 30px;
 	font-weight: bolder;
+	background-color: red;
+	border-width: 0px;
 }
 #dateWrap{
 	font-size: 16px;
@@ -98,11 +101,16 @@
 #yearTable td:hover, #monthTable td:hover{
 	background-color: #ff0;
 }
+td{
+	user-select: none;
+	-moz-user-select:none;
+	-webkit-user-select:none;
+}
 
 /*日期选择样式表*/
-/*.click{
-	font-weight: bolder;
-}*/
+.click{
+	background-color: #a9cfec !important;
+}
 
 /*特定的样式*/
 #calendar .hide{

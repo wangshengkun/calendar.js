@@ -198,8 +198,8 @@ Tiro.Component.Calendar.prototype = {
 		const calendar = Tiro.Dom.createNode("div", "calendar");
 		const calendarTitle = Tiro.Dom.createNode("div", "calendarTitle");
 		const dateWrap = Tiro.Dom.createNode("div", "dateWrap");
-		const pre = Tiro.Dom.createNode("a", "preMonth");
-		const next = Tiro.Dom.createNode("a", "nextMonth");
+		const pre = Tiro.Dom.createNode("button", "preMonth");
+		const next = Tiro.Dom.createNode("button", "nextMonth");
 		const titleYear = Tiro.Dom.createNode("span", "titleYear");
 		const titleMonth = Tiro.Dom.createNode("span", "titleMonth");
 		const yearTxt = Tiro.Dom.createNode("", "yearTxt");
@@ -472,18 +472,16 @@ Tiro.Component.Calendar.prototype = {
 
 	printTime:function(target){
 		if(target.value !== ""){
-			// Tiro.Event.addHandler(target, "mousedown", function(){
-			// 	target.classList.add("click");
-			// })
+			Tiro.Event.addHandler(target, "mousedown", function(){
+				target.classList.add("click");
+			});
 			Tiro.Pattern.Observer.trigger("printTime", this.year, this.month, parseInt(target.innerHTML));
+			Tiro.Event.addHandler(target, "mouseup", function(){
+				target.classList.remove("click");
+			});
 		}	
 	}
-/*	hideSelection:function(){
-		var yearTable = document.getElementById("yearTable"),
-			monthTable = document.getElementById("monthTable");
-		yearTable.classList.add("hide");
-		monthTable.classList.add("hide");
-}*/
+	
 }
 
 //专属日历组件的辅助函数集
